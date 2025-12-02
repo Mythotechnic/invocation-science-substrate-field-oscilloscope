@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Substrate Field Oscilloscope (Ω) — V2 Debug</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 20% 0%, #050816 0, #02040a 42%, #000000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      color: #e5f0ff;
+    }
+
+    #appRoot {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(340px, 1fr);
+      grid-template-rows: 100%;
+      width: 100%;
+      height: 100%;
+    }
+
+    #threeContainer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #threeCanvasOverlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    #sidePanel {
+      position: relative;
+      padding: 16px 18px;
+      border-left: 1px solid rgba(120, 180, 255, 0.16);
+      background:
+        radial-gradient(circle at 0 0, rgba(0, 178, 255, 0.18) 0, transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(140, 100, 255, 0.18) 0, transparent 45%),
+        linear-gradient(145deg, rgba(2, 6, 23, 0.96), rgba(3, 7, 30, 0.96));
+      backdrop-filter: blur(12px);
+    }
+
+    .panel-header {
+      margin-bottom: 10px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      opacity: 0.85;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 2px;
+      color: #a5b4fc;
+    }
+
+    .panel-section {
+      margin-top: 16px;
+      padding: 10px 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: radial-gradient(circle at 0 0, rgba(148, 163, 255, 0.08) 0, transparent 55%);
+    }
+
+    .panel-section h3 {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-top: 2px;
+      color: #c4d1ff;
+    }
+
+    .kv-row span.key {
+      opacity: 0.7;
+    }
+
+    .kv-row span.value {
+      font-variant-numeric: tabular-nums;
+      color: #e5e7eb;
+    }
+
+    .slider-row {
+      margin-top: 6px;
+    }
+
+    .slider-row label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #e5e7eb;
+      margin-bottom: 2px;
+    }
+
+    .slider-row input[type="range"] {
+      width: 100%;
+    }
+
+    #debugHud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      font-size: 10px;
+      line-height: 1.3;
+      color: #e5e7eb;
+      pointer-events: none;
+      white-space: pre;
+      min-width: 180px;
+    }
+
+    #errorBanner {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 0, 24, 0.94);
+      color: #fecaca;
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      z-index: 20;
+    }
+
+    #errorBanner h2 {
+      font-size: 16px;
+      margin-bottom: 6px;
+      color: #fecaca;
+    }
+
+    #errorBanner code {
+      font-size: 11px;
+      opacity: 0.85;
+    }
+
+    button.small {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+
+    button.small:hover {
+      background: rgba(30, 64, 175, 0.9);
+    }
+  </style>
+
+  <!-- Three.js + OrbitControls -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+  <div id="appRoot">
+    <div id="threeContainer">
+      <div id="threeCanvasOverlay">
+        <div id="debugHud"></div>
+        <div id="errorBanner">
+          <div>
+            <h2>Three.js renderer failed to initialize</h2>
+            <p>Check console for details. This is a debug build of the Substrate Field Oscilloscope (Ω).</p>
+            <p style="margin-top:8px;"><code>window.lastThreeError</code> will contain the last thrown error.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside id="sidePanel">
+      <div class="panel-header">
+        <div class="panel-title">Substrate Field Oscilloscope (Ω)</div>
+        <div class="panel-subtitle">V2 · Three.js debug rig</div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Worldline Regime</h3>
+        <div class="kv-row">
+          <span class="key">Worldlines</span>
+          <span class="value" id="kvWorldlines">0</span>
+        </div>
+        <div class="kv-row">
+          <span class="key">Wells</span>
+          <span class="value" id="kvWells">0</span>
+        </div>
+        <div class="kv-row">
+          <span class="key">Particles</span>
+          <span class="value" id="kvParticles">0</span>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Field Parameters</h3>
+        <div class="slider-row">
+          <label>
+            <span>Background density</span>
+            <span id="lblBgDensity">1.0</span>
+          </label>
+          <input id="bgDensity" type="range" min="0.2" max="2.0" step="0.1" value="1.0" />
+        </div>
+
+        <div class="slider-row">
+          <label>
+            <span>Worldline trail length</span>
+            <span id="lblTrailLen">1.0</span>
+          </label>
+          <input id="trailLen" type="range" min="0.3" max="2.5" step="0.1" value="1.0" />
+        </div>
+
+        <div class="slider-row">
+          <label>
+            <span>Auto-orbit speed</span>
+            <span id="lblOrbit">0.4</span>
+          </label>
+          <input id="orbitSpeed" type="range" min="0.0" max="2.0" step="0.1" value="0.4" />
+        </div>
+
+        <div class="slider-row" style="margin-top:10px; display:flex; justify-content:space-between; gap:8px;">
+          <button class="small" id="btnResetCamera">Reset Camera</button>
+          <button class="small" id="btnRandomize">Randomize Field</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Engine Wiring</h3>
+        <p style="font-size:11px; color:#cbd5f5; opacity:0.9; line-height:1.45;">
+          This build includes a mock <code>engine.getSnapshot()</code> for visualization.
+          Swap it with your live Ω engine and keep all Three.js wiring intact.
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // =====================================================================
+    // Global Three.js state (Ω-style)
+    // =====================================================================
+    let threeRenderer = null;
+    let threeScene = null;
+    let threeCamera = null;
+    let threeControls = null;
+
+    let threeInitialized = false;
+
+    let threeWorldlineGroup = null;
+    let threeWellGroup = null;
+    let threeBackgroundGroup = null;
+    let threeParticleGroup = null;
+
+    let threeAutoOrbitAngle = 0;
+    let animationHandle = null;
+    let lastFrameTime = performance.now();
+    let frameCounter = 0;
+    let fpsAccumulator = 0;
+    let fpsEstimate = 0;
+
+    const debugHud = document.getElementById("debugHud");
+    const errorBanner = document.getElementById("errorBanner");
+
+    const kvWorldlines = document.getElementById("kvWorldlines");
+    const kvWells = document.getElementById("kvWells");
+    const kvParticles = document.getElementById("kvParticles");
+
+    const bgDensitySlider = document.getElementById("bgDensity");
+    const trailLenSlider = document.getElementById("trailLen");
+    const orbitSpeedSlider = document.getElementById("orbitSpeed");
+    const lblBgDensity = document.getElementById("lblBgDensity");
+    const lblTrailLen = document.getElementById("lblTrailLen");
+    const lblOrbit = document.getElementById("lblOrbit");
+
+    const btnResetCamera = document.getElementById("btnResetCamera");
+    const btnRandomize = document.getElementById("btnRandomize");
+
+    // "params" stub (you can wire your real param object here)
+    const params = {
+      backgroundDensity: parseFloat(bgDensitySlider.value),
+      trailLengthScale: parseFloat(trailLenSlider.value),
+      autoOrbitSpeed: parseFloat(orbitSpeedSlider.value),
+    };
+
+    // =====================================================================
+    // Mock engine for visual debugging
+    // Replace with your real engine.getSnapshot()
+    // =====================================================================
+    const engine = {
+      // This mimics a dynamic universe snapshot.
+      getSnapshot(timeSec) {
+        const t = timeSec;
+        const worldlineCount = 32;
+        const wellCount = 3;
+
+        const wells = [];
+        for (let i = 0; i < wellCount; i++) {
+          const angle = (i / wellCount) * Math.PI * 2 + t * 0.12;
+          const radius = 7.5;
+          wells.push({
+            id: "well_" + i,
+            position: {
+              x: Math.cos(angle) * radius,
+              y: (i - 1) * 1.2,
+              z: Math.sin(angle) * radius,
+            },
+            depth: 0.8 + 0.5 * Math.sin(t * 0.6 + i),
+          });
+        }
+
+        const worldlines = [];
+        for (let i = 0; i < worldlineCount; i++) {
+          const baseAngle = (i / worldlineCount) * Math.PI * 2;
+          const radius = 2.5 + 2.0 * Math.sin(t * 0.4 + i * 0.31);
+          const height = 3.0 + 2.0 * Math.cos(t * 0.3 + i * 0.2);
+
+          const segments = [];
+          const segCount = Math.round(30 * params.trailLengthScale);
+          for (let s = 0; s < segCount; s++) {
+            const alpha = s / (segCount - 1 || 1);
+            const ang = baseAngle + alpha * 3.0 + t * 0.6;
+            const r = radius + 0.9 * Math.sin(t + i * 0.8 + alpha * 4.0);
+            const y = (alpha - 0.5) * height;
+            segments.push({
+              x: Math.cos(ang) * r,
+              y,
+              z: Math.sin(ang) * r,
+            });
+          }
+
+          worldlines.push({
+            id: "wl_" + i,
+            segments,
+          });
+        }
+
+        return { wells, worldlines };
+      },
+    };
+
+    // =====================================================================
+    // Regime color helper – feel free to map this back to your own logic
+    // =====================================================================
+    function regimeColor(type, intensity) {
+      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+      const i = clamp(intensity ?? 1, 0, 1);
+
+      if (type === "well") {
+        return new THREE.Color().setHSL(0.62, 0.9, 0.56 + 0.2 * i);
+      }
+      if (type === "worldline") {
+        return new THREE.Color().setHSL(0.56 - 0.07 * i, 0.9, 0.6);
+      }
+      if (type === "particle") {
+        return new THREE.Color().setHSL(0.56 + 0.1 * i, 1.0, 0.7);
+      }
+      return new THREE.Color(0xffffff);
+    }
+
+    // =====================================================================
+    // Three.js initialization
+    // =====================================================================
+    function initThree() {
+      if (threeInitialized) return;
+
+      try {
+        const container = document.getElementById("threeContainer");
+        if (!container) {
+          throw new Error("threeContainer element not found in DOM.");
+        }
+
+        threeRenderer = new THREE.WebGLRenderer({
+          antialias: true,
+          alpha: true,
+        });
+        threeRenderer.setPixelRatio(window.devicePixelRatio || 1);
+        threeRenderer.setSize(container.clientWidth, container.clientHeight);
+        threeRenderer.outputEncoding = THREE.sRGBEncoding;
+        threeRenderer.setClearColor(0x000000, 0);
+
+        container.appendChild(threeRenderer.domElement);
+
+        threeScene = new THREE.Scene();
+
+        // Camera
+        const fov = 40;
+        const aspect = container.clientWidth / container.clientHeight;
+        threeCamera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 200);
+        threeCamera.position.set(0, 9, 18);
+
+        // Controls
+        threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
+        threeControls.enableDamping = true;
+        threeControls.dampingFactor = 0.06;
+        threeControls.autoRotate = false;
+        threeControls.enablePan = false;
+        threeControls.minDistance = 4;
+        threeControls.maxDistance = 60;
+
+        // Groups
+        threeBackgroundGroup = new THREE.Group();
+        threeWorldlineGroup = new THREE.Group();
+        threeWellGroup = new THREE.Group();
+        threeParticleGroup = new THREE.Group();
+
+        threeScene.add(threeBackgroundGroup);
+        threeScene.add(threeWorldlineGroup);
+        threeScene.add(threeWellGroup);
+        threeScene.add(threeParticleGroup);
+
+        // Ambient + subtle directional light
+        const ambient = new THREE.AmbientLight(0x445566, 0.7);
+        threeScene.add(ambient);
+
+        const dir = new THREE.DirectionalLight(0xaabfff, 0.7);
+        dir.position.set(5, 8, 3);
+        threeScene.add(dir);
+
+        // Build visuals
+        buildBackground();
+        rebuildFromEngine(0);
+
+        // Event wiring
+        window.addEventListener("resize", onWindowResize);
+
+        btnResetCamera.addEventListener("click", resetCamera);
+        btnRandomize.addEventListener("click", () => {
+          // In a proper build this would nudge the engine parameters.
+          // For now, we just randomize the camera angle a bit.
+          threeCamera.position.set(
+            (Math.random() - 0.5) * 8,
+            6 + Math.random() * 6,
+            12 + (Math.random() - 0.5) * 6
+          );
+          threeCamera.lookAt(0, 0, 0);
+        });
+
+        bgDensitySlider.addEventListener("input", () => {
+          params.backgroundDensity = parseFloat(bgDensitySlider.value);
+          lblBgDensity.textContent = params.backgroundDensity.toFixed(1);
+          rebuildBackground();
+        });
+
+        trailLenSlider.addEventListener("input", () => {
+          params.trailLengthScale = parseFloat(trailLenSlider.value);
+          lblTrailLen.textContent = params.trailLengthScale.toFixed(1);
+        });
+
+        orbitSpeedSlider.addEventListener("input", () => {
+          params.autoOrbitSpeed = parseFloat(orbitSpeedSlider.value);
+          lblOrbit.textContent = params.autoOrbitSpeed.toFixed(1);
+        });
+
+        threeInitialized = true;
+        errorBanner.style.display = "none";
+        animate();
+      } catch (err) {
+        window.lastThreeError = err;
+        console.error("Failed to initialize Three.js:", err);
+        errorBanner.style.display = "flex";
+      }
+    }
+
+    function resetCamera() {
+      if (!threeCamera) return;
+      threeCamera.position.set(0, 9, 18);
+      threeCamera.lookAt(0, 0, 0);
+      if (threeControls) {
+        threeControls.target.set(0, 0, 0);
+        threeControls.update();
+      }
+    }
+
+    function onWindowResize() {
+      if (!threeRenderer || !threeCamera) return;
+      const container = document.getElementById("threeContainer");
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      threeRenderer.setSize(w, h);
+      threeCamera.aspect = w / h;
+      threeCamera.updateProjectionMatrix();
+    }
+
+    // =====================================================================
+    // Background (stars / substrate particles)
+    // =====================================================================
+    function buildBackground() {
+      clearGroup(threeBackgroundGroup);
+
+      const starCount = Math.floor(2200 * params.backgroundDensity);
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(starCount * 3);
+      const colors = new Float32Array(starCount * 3);
+
+      const color = new THREE.Color();
+
+      for (let i = 0; i < starCount; i++) {
+        // Uniform sphere-ish
+        const r = 40 * Math.pow(Math.random(), 0.4);
+        const theta = Math.random() * Math.PI * 2;
+        const phi = (Math.random() - 0.5) * Math.PI;
+
+        const x = r * Math.cos(phi) * Math.cos(theta);
+        const y = r * Math.sin(phi) * 0.6;
+        const z = r * Math.cos(phi) * Math.sin(theta);
+
+        positions[i * 3 + 0] = x;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = z;
+
+        const intensity = 0.55 + 0.4 * Math.random();
+        color.copy(regimeColor("particle", intensity));
+        colors[i * 3 + 0] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
+      }
+
+      geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.09,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const points = new THREE.Points(geometry, material);
+      threeBackgroundGroup.add(points);
+    }
+
+    function rebuildBackground() {
+      buildBackground();
+    }
+
+    // =====================================================================
+    // Wells + Worldlines from engine snapshot
+    // =====================================================================
+    function clearGroup(group) {
+      if (!group) return;
+      while (group.children.length) {
+        const obj = group.children.pop();
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((m) => m.dispose && m.dispose());
+          } else {
+            obj.material.dispose && obj.material.dispose();
+          }
+        }
+      }
+    }
+
+    function rebuildFromEngine(timeSec) {
+      const snapshot = engine.getSnapshot(timeSec);
+
+      buildWells(snapshot.wells || []);
+      buildWorldlines(snapshot.worldlines || []);
+
+      // For now, we drive a simple orbiting particle belt around wells
+      buildParticles(snapshot.wells || []);
+
+      kvWorldlines.textContent = (snapshot.worldlines || []).length;
+      kvWells.textContent = (snapshot.wells || []).length;
+      kvParticles.textContent = threeParticleGroup.children.length;
+    }
+
+    function buildWells(wells) {
+      clearGroup(threeWellGroup);
+
+      wells.forEach((well) => {
+        const depth = well.depth ?? 1;
+        const radius = 0.6 + 0.8 * depth;
+        const color = regimeColor("well", depth);
+
+        const geo = new THREE.SphereGeometry(radius, 32, 32);
+        const mat = new THREE.MeshStandardMaterial({
+          color,
+          emissive: color.clone().multiplyScalar(1.4),
+          roughness: 0.15,
+          metalness: 0.5,
+        });
+
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(well.position.x, well.position.y, well.position.z);
+
+        // Glow halo
+        const glowGeo = new THREE.SphereGeometry(radius * 1.6, 32, 32);
+        const glowMat = new THREE.MeshBasicMaterial({
+          color,
+          transparent: true,
+          opacity: 0.22,
+          blending: THREE.AdditiveBlending,
+          side: THREE.BackSide,
+          depthWrite: false,
+        });
+        const glow = new THREE.Mesh(glowGeo, glowMat);
+        glow.position.copy(mesh.position);
+
+        threeWellGroup.add(mesh);
+        threeWellGroup.add(glow);
+      });
+    }
+
+    function buildWorldlines(worldlines) {
+      clearGroup(threeWorldlineGroup);
+
+      worldlines.forEach((wl) => {
+        const points = wl.segments || [];
+        if (points.length < 2) return;
+
+        const positions = new Float32Array(points.length * 3);
+        const colors = new Float32Array(points.length * 3);
+
+        const baseColor = regimeColor("worldline", 1);
+        const c = new THREE.Color();
+
+        for (let i = 0; i < points.length; i++) {
+          const p = points[i];
+          positions[i * 3 + 0] = p.x;
+          positions[i * 3 + 1] = p.y;
+          positions[i * 3 + 2] = p.z;
+
+          const t = i / (points.length - 1 || 1);
+          const intensity = 0.5 + 0.5 * t;
+          c.copy(baseColor).multiplyScalar(0.6 + 0.7 * intensity);
+          colors[i * 3 + 0] = c.r;
+          colors[i * 3 + 1] = c.g;
+          colors[i * 3 + 2] = c.b;
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+        geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+        const mat = new THREE.LineBasicMaterial({
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.95,
+          linewidth: 1, // note: ignored on most platforms but kept for intent
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        });
+
+        const line = new THREE.Line(geo, mat);
+        threeWorldlineGroup.add(line);
+      });
+    }
+
+    // =====================================================================
+    // Particle belt around wells (simple visual telemetry)
+    // =====================================================================
+    function buildParticles(wells) {
+      clearGroup(threeParticleGroup);
+
+      const countPerWell = 60;
+      const total = wells.length * countPerWell;
+
+      if (!total) return;
+
+      const geo = new THREE.BufferGeometry();
+      const positions = new Float32Array(total * 3);
+      const colors = new Float32Array(total * 3);
+      const phases = new Float32Array(total * 3); // [angle, radius, speedFactor]
+
+      const col = new THREE.Color();
+
+      let idx = 0;
+      wells.forEach((well) => {
+        const basePos = new THREE.Vector3(well.position.x, well.position.y, well.position.z);
+
+        for (let i = 0; i < countPerWell; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const radius = 1.2 + Math.random() * 2.5;
+          const speed = 0.2 + Math.random() * 0.5;
+
+          const x = basePos.x + Math.cos(angle) * radius;
+          const y = basePos.y + (Math.random() - 0.5) * 0.6;
+          const z = basePos.z + Math.sin(angle) * radius;
+
+          const intensity = 0.4 + 0.6 * Math.random();
+          col.copy(regimeColor("particle", intensity));
+
+          positions[idx * 3 + 0] = x;
+          positions[idx * 3 + 1] = y;
+          positions[idx * 3 + 2] = z;
+
+          colors[idx * 3 + 0] = col.r;
+          colors[idx * 3 + 1] = col.g;
+          colors[idx * 3 + 2] = col.b;
+
+          phases[idx * 3 + 0] = angle;
+          phases[idx * 3 + 1] = radius;
+          phases[idx * 3 + 2] = speed;
+
+          idx++;
+        }
+      });
+
+      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      geo.setAttribute("phase", new THREE.BufferAttribute(phases, 3));
+
+      const mat = new THREE.PointsMaterial({
+        size: 0.05,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.95,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const pts = new THREE.Points(geo, mat);
+      threeParticleGroup.add(pts);
+    }
+
+    function updateParticles(timeSec) {
+      const pts = threeParticleGroup.children[0];
+      if (!pts) return;
+      const positions = pts.geometry.getAttribute("position");
+      const phases = pts.geometry.getAttribute("phase");
+      if (!positions || !phases) return;
+
+      const count = positions.count;
+      const t = timeSec;
+
+      for (let i = 0; i < count; i++) {
+        const baseAngle = phases.getX(i);
+        const radius = phases.getY(i);
+        const speed = phases.getZ(i);
+
+        const angle = baseAngle + t * speed;
+        const wobble = 0.08 * Math.sin(t * 3 + i * 0.7);
+
+        const currentX = positions.getX(i);
+        const currentY = positions.getY(i);
+        const currentZ = positions.getZ(i);
+
+        const centerRadius = Math.sqrt(currentX * currentX + currentZ * currentZ);
+        const baseHeight = currentY;
+
+        const newX = Math.cos(angle) * (radius + wobble * 4);
+        const newZ = Math.sin(angle) * (radius + wobble * 4);
+        const newY = baseHeight + wobble;
+
+        positions.setXYZ(i, newX, newY, newZ);
+      }
+
+      positions.needsUpdate = true;
+    }
+
+    // =====================================================================
+    // Animation loop
+    // =====================================================================
+    function animate() {
+      animationHandle = requestAnimationFrame(animate);
+
+      const now = performance.now();
+      const dt = (now - lastFrameTime) / 1000;
+      lastFrameTime = now;
+      frameCounter++;
+
+      fpsAccumulator += dt;
+      if (fpsAccumulator >= 0.5) {
+        fpsEstimate = frameCounter / fpsAccumulator;
+        frameCounter = 0;
+        fpsAccumulator = 0;
+      }
+
+      const timeSec = now * 0.001;
+
+      // Auto orbit (can be disabled by setting speed to 0)
+      if (params.autoOrbitSpeed > 0 && threeCamera && threeControls) {
+        threeAutoOrbitAngle += dt * params.autoOrbitSpeed * 0.3;
+        const r = 18;
+        threeCamera.position.x = Math.cos(threeAutoOrbitAngle) * r;
+        threeCamera.position.z = Math.sin(threeAutoOrbitAngle) * r;
+        threeCamera.position.y = 9;
+        threeControls.target.set(0, 0, 0);
+      }
+
+      if (threeControls) {
+        threeControls.update();
+      }
+
+      // Rebuild worldlines & wells each frame based on engine snapshot
+      rebuildFromEngine(timeSec);
+      updateParticles(timeSec);
+
+      if (threeRenderer && threeScene && threeCamera) {
+        threeRenderer.render(threeScene, threeCamera);
+      }
+
+      updateDebugHud(dt);
+    }
+
+    function updateDebugHud(dt) {
+      if (!debugHud) return;
+      debugHud.textContent =
+        "Ω Substrate Field Oscilloscope — V2\n" +
+        "Three.js: OK\n" +
+        `dt: ${(dt * 1000).toFixed(1)} ms\n` +
+        `FPS (est): ${fpsEstimate.toFixed(1)}\n` +
+        `bgDensity: ${params.backgroundDensity.toFixed(1)}\n` +
+        `trailLengthScale: ${params.trailLengthScale.toFixed(1)}\n` +
+        `autoOrbitSpeed: ${params.autoOrbitSpeed.toFixed(1)}`;
+    }
+
+    // =====================================================================
+    // Bootstrap
+    // =====================================================================
+    window.addEventListener("DOMContentLoaded", initThree);
+  </script>
+</body>
+</html>

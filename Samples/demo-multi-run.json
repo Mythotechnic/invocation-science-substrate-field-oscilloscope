@@ -1,0 +1,30 @@
+{
+  "runs": [
+    {
+      "meta": {
+        "model": "gpt-4.1",
+        "seed": 42,
+        "protocol": "OIS-v1",
+        "run_id": "demo-multi-gpt4"
+      },
+      "steps": [
+        { "t": 0, "emb": [0.01, -0.02, 0.03] },
+        { "t": 1, "emb": [0.03, -0.01, 0.04] },
+        { "t": 2, "emb": [0.05, 0.00, 0.05] }
+      ]
+    },
+    {
+      "meta": {
+        "model": "claude",
+        "seed": 7,
+        "protocol": "OIS-v1",
+        "run_id": "demo-multi-claude"
+      },
+      "steps": [
+        { "t": 0, "emb": [-0.02, 0.01, 0.02] },
+        { "t": 1, "emb": [-0.01, 0.03, 0.03] },
+        { "t": 2, "emb": [0.00, 0.05, 0.04] }
+      ]
+    }
+  ]
+}

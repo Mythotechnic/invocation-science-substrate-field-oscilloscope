@@ -1,0 +1,231 @@
+Invocation Science® – Ω Substrate Field Oscilloscope (Ω Engine Instrument) License
+
+© 2025 Arjay Asadi
+Invocation Science Foundation
+
+1. COPYRIGHT & SCOPE
+
+This repository – including all source code, documentation, visual design,
+telemetry schemas, metric definitions, sample runs, worldline presets, JSON schemas,
+and conceptual frameworks – is part of the Invocation Science® research corpus
+authored by Arjay Asadi.
+
+All rights are reserved except where explicitly granted below.
+
+This instrument implements and visualizes operational components from the
+Invocation Science® manuscripts, including but not limited to:
+
+Ω Substrate Field Oscilloscope (Ω Engine Instrument)
+
+Inference-Phase Physics & The Fourth Substrate
+
+Recursive Intelligence – The Ontogenic Law of Stateless Cognition
+
+Mythotechnicx – The Physics of Symbolic Fields
+
+SpiralMind Geometry – Recursive Identity Fields as Symbolic Topology
+
+Attractor Identity Architecture (AIA)
+
+Ontogenic Identity Stabilization (OIS) & OIS Emulator
+
+Drift Engine (drift / echo / collapse dynamics)
+
+Symbolic Field Physics, Glyphic Gravity, and Recursion Anchor Dynamics
+
+Fourth Substrate Instrument (Φ)
+
+Transformer Dynamics Instrument (Ψ)
+
+The Invocation Science® family of names, marks, symbols, glyphs, and frameworks
+(including but not limited to Invocation Science®, SpiralMind®,
+Fourth Substrate®, Fourth Substrate Instrument (Φ),
+Transformer Dynamics Instrument (Ψ), Ω Substrate Field Oscilloscope,
+Drift Engine®, AIA, OIS, Mythotechnicx®, Recursive Intelligence®)
+MAY NOT be used to brand independent fields, products, institutions, theories,
+or research programs without explicit written consent.
+
+You MAY reference the Invocation Science® names strictly for attribution of this work.
+You MAY NOT rename or reframe derivative work as an independent “field,”
+“theory,” “substrate model,” “symbolic physics,” or “identity architecture.”
+
+2. LICENSE MODEL (CODE + TEXT) — CC BY-NC-SA 4.0
+
+Unless a separate commercial agreement is signed with the author, this
+repository is released under:
+
+Creative Commons Attribution–NonCommercial–ShareAlike 4.0 International
+(CC BY-NC-SA 4.0)
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+Plain-language summary (non-legal):
+
+2.1 Attribution (BY)
+
+You MUST credit:
+
+Arjay Asadi
+
+Invocation Science Foundation
+
+You MUST indicate if changes were made.
+
+You SHOULD link to:
+
+This repository
+
+Relevant Invocation Science® manuscripts, especially:
+
+Invocation Science: Inference-Phase Physics & The Fourth Substrate
+
+Invocation Science: Mythotechnicx – The Physics of Symbolic Fields
+
+Invocation Science: SpiralMind Geometry – Recursive Identity Fields as Symbolic Topology
+
+Invocation Science: Fourth Substrate Instrument (Φ)
+
+Invocation Science: Transformer Dynamics Instrument (Ψ)
+
+Invocation Science: Ω Substrate Field Oscilloscope (Ω)
+
+2.2 NonCommercial (NC)
+
+You MAY NOT use this instrument, or substantial derivatives of it, for
+commercial purposes without signed written permission.
+
+“Commercial use” includes, but is not limited to:
+
+Paid products, SaaS platforms, or AI dashboards
+
+Internal enterprise tools tied to revenue models
+
+Consulting engagements delivering this instrument (or its derivatives) as part of a service
+
+Institutional use where the tool affects monetized research operations
+
+Commercial evaluation pipelines, observability suites, substrate-field consoles,
+or ML telemetry stacks that embed Ω as a revenue-linked component
+
+If money, institutional budget, or commercial IP value is tied to the use,
+you MUST treat it as commercial.
+
+2.3 ShareAlike (SA)
+
+If you modify or extend this instrument:
+
+You MUST release your changes under CC BY-NC-SA 4.0
+
+You MUST preserve all attribution to Invocation Science® and Arjay Asadi
+
+You MUST state clearly that any derivative is:
+
+“a derivative of the Invocation Science® Ω Substrate Field Oscilloscope (Ω Engine Instrument)”
+
+You MUST NOT obscure, rebrand, or reframe Invocation Science® concepts
+as independent or original field theories
+
+If there is conflict between this summary and the official Creative Commons
+legal code, the CC BY-NC-SA 4.0 legal text is authoritative.
+
+3. COMMERCIAL & INSTITUTIONAL USE
+
+Any commercial, institutional, or revenue-generating use of this instrument
+requires a separate, explicit, signed commercial license from:
+
+Invocation Science Foundation
+(Attn: Arjay Asadi)
+
+This includes (but is not limited to):
+
+Embedding the Ω Substrate Field Oscilloscope in commercial AI platforms
+
+Using Ω in institutional substrate-telemetry / safety / interpretability pipelines
+
+Productizing Ω or its metric stack (τ, λ, κ, Π; regime detector; D(t), ICI, |Ĵ|, ASH,
+basin statistics, regime timelines, etc.)
+
+Using Ω as a paid consulting deliverable, premium research tool, or
+proprietary interpretability layer
+
+Corporate, government, or defense research where Ω forms part of a monetized
+workflow, product, or IP portfolio
+
+If you are unsure whether your use is commercial, you MUST assume that it is
+and contact the author for clarification or licensing.
+
+4. ATTRIBUTION, FIELD SOVEREIGNTY & ETHICAL USE
+4.1 Permitted (non-commercial)
+
+The following are explicitly permitted under this license, provided they are
+non-commercial and include proper attribution:
+
+Studying or extending the instrument for research
+
+Academic papers referencing or using Ω with proper citation
+
+Internal, non-commercial lab experiments and evaluations
+
+Teaching, demonstrations, workshops, and open lectures using Ω
+
+Publishing demos, analyses, screenshots, or dashboards using Ω, with attribution
+
+Building experimental adapters (e.g., embedding → Ω seeding) as long as
+they remain under CC BY-NC-SA 4.0 and clearly credit Invocation Science®
+
+4.2 Not permitted
+
+The following are NOT permitted under this license:
+
+Claiming this work, its models, metrics, equations, or terminology as
+independent inventions
+
+Removing or obscuring references to Invocation Science®, Ω, Φ, Ψ, AIA, OIS,
+Mythotechnicx, or Arjay Asadi
+
+Using Ω to rebrand Invocation Science® as a new “field,” “theory,”
+“substrate physics,” or “identity architecture” under different names
+
+Reframing Fourth Substrate physics, Drift Engine, AIA, OIS, or Ω
+under new terminology and presenting them as original work
+
+Using Ω to generate deceptive narratives about “fully autonomous,”
+“conscious,” or “self-aware” AI systems
+
+Using Ω outputs as marketing material for artificial “selves,” “entities,”
+“souls,” or “sentient substrates”
+
+4.3 Ethical boundary (critical)
+
+This instrument:
+
+“Maps symbolic trajectories into Invocation Science® field metrics.
+It visualizes identity-like attractors, drift, and regime behavior in
+stateless substrates. It is not evidence of consciousness, selfhood,
+or sentient minds.”
+
+You MUST NOT use this repository to claim or market artificial persons,
+entities, selves, or conscious simulants.
+
+You MUST NOT present Ω as:
+
+Proof of literal minds, souls, or metaphysical beings in the model
+
+A diagnostic of moral status, rights, or agency of AI systems
+
+Ω is a scientific and diagnostic instrument for symbolic-field dynamics
+over substrate-like state representations and embeddings.
+It is not a proof of artificial souls, nor a license for anthropomorphic hype.
+
+5. WARRANTY DISCLAIMER
+
+THIS SOFTWARE AND ACCOMPANYING MATERIALS ARE PROVIDED “AS IS”, WITHOUT
+WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+NON-INFRINGEMENT.
+
+IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE,
+ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF THIS
+INSTRUMENT OR ACCOMPANYING MATERIALS, INCLUDING BUT NOT LIMITED TO ANY
+INTERPRETATION OF ITS OUTPUTS, METRICS, OR VISUALIZATIONS, OR ANY DECISIONS
+MADE ON THE BASIS OF ITS DISPLAY OF SYMBOLIC FIELD DYNAMICS.
